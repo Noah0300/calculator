@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useLanguage } from './LanguageContext'
+import { useTranslation } from './i18n'
 import './Login.css'
 
 interface LoginProps {
@@ -16,6 +18,8 @@ const USERS_STORAGE_KEY = 'itemList_users'
 const DEFAULT_ADMIN = { username: 'admin', password: 'admin123', role: 'admin' }
 
 export default function Login({ onLoginSuccess, onShowSignUp }: LoginProps) {
+  const { language } = useLanguage()
+  const { t } = useTranslation(language)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -42,7 +46,7 @@ export default function Login({ onLoginSuccess, onShowSignUp }: LoginProps) {
       try {
         // Validate inputs
         if (!username.trim() || !password.trim()) {
-          setError('Please enter both username and password')
+          setError(t('pleaseEnterBoth'))
           setIsLoading(false)
           return
         }
@@ -61,10 +65,10 @@ export default function Login({ onLoginSuccess, onShowSignUp }: LoginProps) {
           setUsername('')
           setPassword('')
         } else {
-          setError('Invalid username or password')
+          setError(t('invalidUsernamePassword'))
         }
       } catch (err) {
-        setError('An error occurred. Please try again.')
+        setError(t('invalidUsernamePassword'))
         console.error(err)
       } finally {
         setIsLoading(false)
@@ -76,32 +80,32 @@ export default function Login({ onLoginSuccess, onShowSignUp }: LoginProps) {
     <div className="login-container">
       <div className="login-box">
         <div className="login-header">
-          <h1>Item Cost Calculator</h1>
-          <p>Sign in to continue</p>
+          <h1>{t('itemCostCalculator')}</h1>
+          <p>{t('signIn')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
-            <label htmlFor="username">Username</label>
+            <label htmlFor="username">{t('username')}</label>
             <input
               type="text"
               id="username"
               value={username}
               onChange={e => setUsername(e.target.value)}
-              placeholder="Enter your username"
+              placeholder={t('enterUsername')}
               disabled={isLoading}
               className={error ? 'input-error' : ''}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">{t('password')}</label>
             <input
               type="password"
               id="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              placeholder="Enter your password"
+              placeholder={t('enterPassword')}
               disabled={isLoading}
               className={error ? 'input-error' : ''}
             />
@@ -110,18 +114,18 @@ export default function Login({ onLoginSuccess, onShowSignUp }: LoginProps) {
           {error && <div className="error-message">{error}</div>}
 
           <button type="submit" className="login-btn" disabled={isLoading}>
-            {isLoading ? 'Signing in...' : 'Sign In'}
+            {isLoading ? t('signingIn') : t('signIn')}
           </button>
         </form>
 
         <div className="login-footer">
-          <p className="demo-text">Demo Credentials:</p>
+          <p className="demo-text">{t('demoCredentials')}:</p>
           <p className="demo-credentials">
             <strong>Username:</strong> admin<br />
             <strong>Password:</strong> admin123
           </p>
           <p style={{ marginTop: '20px', textAlign: 'center', fontSize: '13px', color: '#666' }}>
-            Don't have an account? <button onClick={onShowSignUp} className="link-btn">Sign up with license key</button>
+            {t('dontHaveAccount')} <button onClick={onShowSignUp} className="link-btn">{t('signUpWithLicense')}</button>
           </p>
         </div>
       </div>

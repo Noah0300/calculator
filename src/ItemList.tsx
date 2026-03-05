@@ -1,3 +1,6 @@
+import { exportQuoteToPdf } from './quotePdf'
+import { useLanguage } from './LanguageContext'
+import { useTranslation } from './i18n'
 import './ItemList.css'
 
 interface Item {
@@ -8,11 +11,21 @@ interface Item {
   overheadPercent: string
 }
 
-interface ItemListProps {
-  items: Item[]
+interface ProjectDetails {
+  projectName: string
+  customerName: string
+  preparedBy: string
+  quoteNumber: string
 }
 
-export default function ItemList({ items }: ItemListProps) {
+interface ItemListProps {
+  items: Item[]
+  projectDetails: ProjectDetails
+}
+
+export default function ItemList({ items, projectDetails }: ItemListProps) {
+  const { language } = useLanguage()
+  const { t } = useTranslation(language)
   const calculateItemCosts = (item: Item) => {
     const quantity = Number(item.quantity)
     const unitPrice = Number(item.unitPrice)
@@ -60,18 +73,27 @@ export default function ItemList({ items }: ItemListProps) {
 
   return (
     <div className="item-list-container">
-      <h2>Item Summary</h2>
+      <div className="item-list-header">
+        <h2>{t('itemSummary')}</h2>
+        <button
+          type="button"
+          className="export-pdf-btn"
+          onClick={() => exportQuoteToPdf({ projectDetails, items, totals })}
+        >
+          {t('exportQuotationPDF')}
+        </button>
+      </div>
       <div className="table-wrapper">
         <table className="item-list-table">
           <thead>
             <tr>
-              <th>Item Name</th>
-              <th>Quantity</th>
-              <th>Unit Price</th>
-              <th>Base Cost</th>
-              <th>Labor Cost</th>
-              <th>Overhead Cost</th>
-              <th>Total Cost</th>
+              <th>{t('itemName_header')}</th>
+              <th>{t('quantity_header')}</th>
+              <th>{t('unitPrice_header')}</th>
+              <th>{t('baseCost_header')}</th>
+              <th>{t('laborCost_header')}</th>
+              <th>{t('overheadCost_header')}</th>
+              <th>{t('totalCost_header')}</th>
             </tr>
           </thead>
           <tbody>
@@ -92,7 +114,7 @@ export default function ItemList({ items }: ItemListProps) {
           </tbody>
           <tfoot>
             <tr className="totals-row">
-              <td colSpan={3} className="totals-label">Grand Totals</td>
+              <td colSpan={3} className="totals-label">{t('grandTotals')}</td>
               <td className="numeric">${totals.totalBase.toFixed(2)}</td>
               <td className="numeric">${totals.totalLabor.toFixed(2)}</td>
               <td className="numeric">${totals.totalOverhead.toFixed(2)}</td>

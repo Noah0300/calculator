@@ -6,6 +6,8 @@ import ItemForm from './ItemForm'
 import ItemList from './ItemList'
 import ConfirmDialog from './ConfirmDialog'
 import { initializeDefaultAdminLicense } from './licenseUtils'
+import { useLanguage } from './LanguageContext'
+import { useTranslation } from './i18n'
 import './App.css'
 
 interface Item {
@@ -24,18 +26,33 @@ interface AuthState {
   role: string
 }
 
+interface ProjectDetails {
+  projectName: string
+  customerName: string
+  preparedBy: string
+  quoteNumber: string
+}
+
 // Helper function to get user-specific storage key
 const getUserStorageKey = (username: string): string => {
   return `itemList_items_${username}`
 }
 
 function App() {
+  const { language } = useLanguage()
+  const { t } = useTranslation(language)
   const [auth, setAuth] = useState<AuthState>({ isLoggedIn: false, username: '', role: '' })
   const [items, setItems] = useState<Item[]>([])
   const [isLoadingAuth, setIsLoadingAuth] = useState(true)
   const [isLoadingItems, setIsLoadingItems] = useState(true)
   const [showClearConfirm, setShowClearConfirm] = useState(false)
   const [showSignUp, setShowSignUp] = useState(false)
+  const [projectDetails, setProjectDetails] = useState<ProjectDetails>({
+    projectName: '',
+    customerName: '',
+    preparedBy: '',
+    quoteNumber: '',
+  })
 
   // Initialize default admin license on app load
   useEffect(() => {
@@ -121,6 +138,10 @@ function App() {
     setItems(prev => [...prev, newItem])
   }
 
+  const handleProjectDetailsChange = (field: keyof ProjectDetails, value: string) => {
+    setProjectDetails(prev => ({ ...prev, [field]: value }))
+  }
+
   const handleClearAllClick = () => {
     setShowClearConfirm(true)
   }
@@ -178,44 +199,88 @@ function App() {
     <div className="app-container">
       <ConfirmDialog
         isOpen={showClearConfirm}
-        title="Clear All Items?"
-        message="This action will permanently delete all items from your list. This cannot be undone."
+        title={t('clearAllConfirm')}
+        message={t('clearAllMessage')}
         onConfirm={handleConfirmClear}
         onCancel={handleCancelClear}
-        confirmText="Delete All"
-        cancelText="Keep Items"
+        confirmText={t('deleteAll')}
+        cancelText={t('keepItems')}
         isDangerous={true}
       />
       
       <div className="app-header">
         <div style={{ flex: 1 }}>
-          <h1>Item Cost Calculator</h1>
-          <p>Manage your items and calculate total costs with labor and overhead factors</p>
+          <h1>{t('itemCostCalculator')}</h1>
+          <p>{t('manageItems')}</p>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <p style={{ marginTop: 0, marginBottom: '8px', fontSize: '14px', color: '#666' }}>
-            Logged in as: <strong>{auth.username}</strong>
-          </p>
-          <button 
-            onClick={handleLogout}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#e74c3c',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '12px',
-              fontWeight: '600',
-              textTransform: 'uppercase',
-            }}
-          >
-            Logout
-          </button>
+        <div style={{ textAlign: 'right', display: 'flex', gap: '1rem', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+          <div>
+            <p style={{ marginTop: 0, marginBottom: '8px', fontSize: '14px', color: '#666' }}>
+              {t('loggedInAs')} <strong>{auth.username}</strong>
+            </p>
+            <button 
+              onClick={handleLogout}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#e74c3c',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '12px',
+                fontWeight: '600',
+                textTransform: 'uppercase',
+              }}
+            >
+              {t('logout')}
+            </button>
+          </div>
         </div>
       </div>
 
       <div className="app-content">
+        <div className="project-details-card">
+          <h2>{t('quotationDetails')}</h2>
+          <div className="project-details-grid">
+            <label>
+              {t('projectName')}
+              <input
+                type="text"
+                value={projectDetails.projectName}
+                onChange={e => handleProjectDetailsChange('projectName', e.target.value)}
+                placeholder={t('officeRenovation')}
+              />
+            </label>
+            <label>
+              {t('customerName')}
+              <input
+                type="text"
+                value={projectDetails.customerName}
+                onChange={e => handleProjectDetailsChange('customerName', e.target.value)}
+                placeholder={t('acmeIndustries')}
+              />
+            </label>
+            <label>
+              {t('preparedBy')}
+              <input
+                type="text"
+                value={projectDetails.preparedBy}
+                onChange={e => handleProjectDetailsChange('preparedBy', e.target.value)}
+                placeholder={t('yourCompanyName')}
+              />
+            </label>
+            <label>
+              {t('quoteNumber')}
+              <input
+                type="text"
+                value={projectDetails.quoteNumber}
+                onChange={e => handleProjectDetailsChange('quoteNumber', e.target.value)}
+                placeholder="Q-2026-001"
+              />
+            </label>
+          </div>
+        </div>
+
         <ItemForm onAddItem={handleAddItem} />
         
         {items.length > 0 && (
@@ -223,14 +288,14 @@ function App() {
             <button 
               onClick={handleClearAllClick}
               className="clear-all-btn"
-              title="Delete all items from the list"
+              title={t('clearAllMessage')}
             >
-              Clear All Items
+              {t('clearAllItems')}
             </button>
           </div>
         )}
         
-        <ItemList items={items} />
+        <ItemList items={items} projectDetails={projectDetails} />
       </div>
     </div>
   )

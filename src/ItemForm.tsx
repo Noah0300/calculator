@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useLanguage } from './LanguageContext'
+import { useTranslation } from './i18n'
 import './ItemForm.css'
 
 interface FormData {
@@ -24,6 +26,8 @@ interface ItemFormProps {
 }
 
 export default function ItemForm({ onAddItem }: ItemFormProps) {
+  const { language } = useLanguage()
+  const { t } = useTranslation(language)
   const [formData, setFormData] = useState<FormData>({
     itemName: '',
     quantity: '',
@@ -40,35 +44,35 @@ export default function ItemForm({ onAddItem }: ItemFormProps) {
 
     // Validate item name
     if (!formData.itemName.trim()) {
-      newErrors.itemName = 'Item name is required'
+      newErrors.itemName = t('itemNameRequired')
     }
 
     // Validate quantity
     if (!formData.quantity) {
-      newErrors.quantity = 'Quantity is required'
+      newErrors.quantity = t('quantityRequired')
     } else if (isNaN(Number(formData.quantity)) || Number(formData.quantity) <= 0) {
-      newErrors.quantity = 'Quantity must be a positive number'
+      newErrors.quantity = t('quantityMustBePositive')
     }
 
     // Validate unit price
     if (!formData.unitPrice) {
-      newErrors.unitPrice = 'Unit price is required'
+      newErrors.unitPrice = t('unitPriceRequired')
     } else if (isNaN(Number(formData.unitPrice)) || Number(formData.unitPrice) < 0) {
-      newErrors.unitPrice = 'Unit price must be a non-negative number'
+      newErrors.unitPrice = t('unitPriceMustBeNonNegative')
     }
 
     // Validate labor percent
     if (!formData.laborPercent) {
-      newErrors.laborPercent = 'Labor % is required'
+      newErrors.laborPercent = t('laborPercentRequired')
     } else if (isNaN(Number(formData.laborPercent)) || Number(formData.laborPercent) < 0 || Number(formData.laborPercent) > 100) {
-      newErrors.laborPercent = 'Labor % must be between 0 and 100'
+      newErrors.laborPercent = t('laborPercentBetween')
     }
 
     // Validate overhead percent
     if (!formData.overheadPercent) {
-      newErrors.overheadPercent = 'Overhead % is required'
+      newErrors.overheadPercent = t('overheadPercentRequired')
     } else if (isNaN(Number(formData.overheadPercent)) || Number(formData.overheadPercent) < 0 || Number(formData.overheadPercent) > 100) {
-      newErrors.overheadPercent = 'Overhead % must be between 0 and 100'
+      newErrors.overheadPercent = t('overheadPercentBetween')
     }
 
     setErrors(newErrors)
@@ -111,7 +115,7 @@ export default function ItemForm({ onAddItem }: ItemFormProps) {
         laborPercent: '',
         overheadPercent: '',
       })
-      setSuccessMessage('Item added successfully!')
+      setSuccessMessage(t('itemAddedSuccessfully'))
       setTimeout(() => setSuccessMessage(''), 3000)
     }
   }
@@ -130,32 +134,32 @@ export default function ItemForm({ onAddItem }: ItemFormProps) {
 
   return (
     <div className="item-form-container">
-      <h1>Item Cost Calculator</h1>
+      <h1>{t('itemCostCalculator')}</h1>
 
       <form onSubmit={handleSubmit} className="item-form">
         <div className="form-group">
-          <label htmlFor="itemName">Item Name *</label>
+          <label htmlFor="itemName">{t('itemName')} *</label>
           <input
             type="text"
             id="itemName"
             name="itemName"
             value={formData.itemName}
             onChange={handleInputChange}
-            placeholder="Enter item name"
+            placeholder={t('enterItemName')}
             className={errors.itemName ? 'input-error' : ''}
           />
           {errors.itemName && <span className="error-message">{errors.itemName}</span>}
         </div>
 
         <div className="form-group">
-          <label htmlFor="quantity">Quantity *</label>
+          <label htmlFor="quantity">{t('quantity')} *</label>
           <input
             type="number"
             id="quantity"
             name="quantity"
             value={formData.quantity}
             onChange={handleInputChange}
-            placeholder="Enter quantity"
+            placeholder={t('enterQuantity')}
             step="0.01"
             className={errors.quantity ? 'input-error' : ''}
           />
@@ -163,14 +167,14 @@ export default function ItemForm({ onAddItem }: ItemFormProps) {
         </div>
 
         <div className="form-group">
-          <label htmlFor="unitPrice">Unit Price ($) *</label>
+          <label htmlFor="unitPrice">{t('unitPrice')} *</label>
           <input
             type="number"
             id="unitPrice"
             name="unitPrice"
             value={formData.unitPrice}
             onChange={handleInputChange}
-            placeholder="Enter unit price"
+            placeholder={t('enterUnitPrice')}
             step="0.01"
             className={errors.unitPrice ? 'input-error' : ''}
           />
@@ -178,14 +182,14 @@ export default function ItemForm({ onAddItem }: ItemFormProps) {
         </div>
 
         <div className="form-group">
-          <label htmlFor="laborPercent">Labor (%) *</label>
+          <label htmlFor="laborPercent">{t('labor')} *</label>
           <input
             type="number"
             id="laborPercent"
             name="laborPercent"
             value={formData.laborPercent}
             onChange={handleInputChange}
-            placeholder="Enter labor cost percentage"
+            placeholder={t('enterLaborPercentage')}
             step="0.01"
             min="0"
             max="100"
@@ -195,14 +199,14 @@ export default function ItemForm({ onAddItem }: ItemFormProps) {
         </div>
 
         <div className="form-group">
-          <label htmlFor="overheadPercent">Overhead (%) *</label>
+          <label htmlFor="overheadPercent">{t('overhead')} *</label>
           <input
             type="number"
             id="overheadPercent"
             name="overheadPercent"
             value={formData.overheadPercent}
             onChange={handleInputChange}
-            placeholder="Enter overhead cost percentage"
+            placeholder={t('enterOverheadPercentage')}
             step="0.01"
             min="0"
             max="100"
@@ -214,8 +218,8 @@ export default function ItemForm({ onAddItem }: ItemFormProps) {
         {successMessage && <div className="success-message">{successMessage}</div>}
 
         <div className="form-buttons">
-          <button type="submit" className="btn-submit">Add Item</button>
-          <button type="button" onClick={handleReset} className="btn-reset">Reset</button>
+          <button type="submit" className="btn-submit">{t('addItem')}</button>
+          <button type="button" onClick={handleReset} className="btn-reset">{t('reset')}</button>
         </div>
       </form>
     </div>

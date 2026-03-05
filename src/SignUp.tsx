@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { validateLicenseKey, useLicenseKey } from './licenseUtils'
+import { useLanguage } from './LanguageContext'
+import { useTranslation } from './i18n'
 import './SignUp.css'
 
 interface SignUpProps {
@@ -16,6 +18,8 @@ interface User {
 const USERS_STORAGE_KEY = 'itemList_users'
 
 export default function SignUp({ onSignUpSuccess, onBackToLogin }: SignUpProps) {
+  const { language } = useLanguage()
+  const { t } = useTranslation(language)
   const [licenseKey, setLicenseKey] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -37,7 +41,7 @@ export default function SignUp({ onSignUpSuccess, onBackToLogin }: SignUpProps) 
         const licenseTrimmed = licenseKey.toUpperCase().trim()
         
         if (!licenseTrimmed) {
-          setError('Please enter a license key')
+          setError(t('licenseRequired'))
           setIsLoading(false)
           return
         }
@@ -45,20 +49,20 @@ export default function SignUp({ onSignUpSuccess, onBackToLogin }: SignUpProps) 
         const validLicense = validateLicenseKey(licenseTrimmed)
 
         if (!validLicense) {
-          setError('Invalid or expired license key. Please check and try again.')
+          setError(t('invalidLicense'))
           setIsLoading(false)
           return
         }
 
         if (validLicense.status === 'used') {
-          setError('This license key has already been used')
+          setError(t('licenseAlreadyUsed'))
           setIsLoading(false)
           return
         }
 
         setValidatedLicense(validLicense)
         setStep('details')
-        setSuccess('License key validated! Please create your account.')
+        setSuccess(t('licenseKeyValidated'))
         setTimeout(() => setSuccess(''), 2000)
       } catch (err) {
         setError('Failed to validate license key')
@@ -78,31 +82,31 @@ export default function SignUp({ onSignUpSuccess, onBackToLogin }: SignUpProps) 
       try {
         // Validate inputs
         if (!username.trim()) {
-          setError('Username is required')
+          setError(t('usernameRequired'))
           setIsLoading(false)
           return
         }
 
         if (username.trim().length < 3) {
-          setError('Username must be at least 3 characters')
+          setError(t('usernameMinChars'))
           setIsLoading(false)
           return
         }
 
         if (!password) {
-          setError('Password is required')
+          setError(t('passwordRequired'))
           setIsLoading(false)
           return
         }
 
         if (password.length < 6) {
-          setError('Password must be at least 6 characters')
+          setError(t('passwordMinChars'))
           setIsLoading(false)
           return
         }
 
         if (password !== confirmPassword) {
-          setError('Passwords do not match')
+          setError(t('passwordsDoNotMatch'))
           setIsLoading(false)
           return
         }
@@ -112,7 +116,7 @@ export default function SignUp({ onSignUpSuccess, onBackToLogin }: SignUpProps) 
         if (existingUsers) {
           const users = JSON.parse(existingUsers)
           if (users.some((u: User) => u.username.toLowerCase() === username.toLowerCase())) {
-            setError('Username already exists')
+            setError(t('usernameAlreadyExists'))
             setIsLoading(false)
             return
           }
@@ -146,7 +150,7 @@ export default function SignUp({ onSignUpSuccess, onBackToLogin }: SignUpProps) 
         // Trigger successful signup
         onSignUpSuccess(username.trim(), userRole)
       } catch (err) {
-        setError('Failed to create account')
+        setError(t('invalidLicense'))
         console.error(err)
       } finally {
         setIsLoading(false)
@@ -158,25 +162,25 @@ export default function SignUp({ onSignUpSuccess, onBackToLogin }: SignUpProps) 
     <div className="signup-container">
       <div className="signup-box">
         <div className="signup-header">
-          <h1>Create Account</h1>
-          <p>Register with your license key</p>
+          <h1>{t('createAccount')}</h1>
+          <p>{t('registerWithLicense')}</p>
         </div>
 
         {step === 'license' ? (
           <form onSubmit={handleValidateLicense} className="signup-form">
             <div className="form-group">
-              <label htmlFor="licenseKey">License Key *</label>
+              <label htmlFor="licenseKey">{t('licenseKey')} *</label>
               <input
                 type="text"
                 id="licenseKey"
                 value={licenseKey}
                 onChange={e => setLicenseKey(e.target.value.toUpperCase())}
-                placeholder="Enter your license key (e.g., XXXX-XXXX-XXXX-XXXX)"
+                placeholder={t('enterLicenseKey')}
                 disabled={isLoading}
                 className={error ? 'input-error' : ''}
               />
               <p className="help-text">
-                Enter the license key provided by your administrator
+                {t('providedByAdmin')}
               </p>
             </div>
 
@@ -184,54 +188,54 @@ export default function SignUp({ onSignUpSuccess, onBackToLogin }: SignUpProps) 
             {success && <div className="success-message">{success}</div>}
 
             <button type="submit" className="signup-btn" disabled={isLoading}>
-              {isLoading ? 'Validating...' : 'Validate License Key'}
+              {isLoading ? t('validating') : t('validateLicenseKey')}
             </button>
           </form>
         ) : (
           <form onSubmit={handleSignUp} className="signup-form">
             <div className="license-info">
-              <p className="info-label">License Type:</p>
+              <p className="info-label">{t('licenseType')}:</p>
               <p className="info-value">
-                {validatedLicense?.type === 'admin' ? '🔑 Admin Account' : '👤 User Account'}
+                {validatedLicense?.type === 'admin' ? t('adminAccount') : t('userAccount')}
               </p>
             </div>
 
             <div className="form-group">
-              <label htmlFor="username">Username *</label>
+              <label htmlFor="username">{t('username')} *</label>
               <input
                 type="text"
                 id="username"
                 value={username}
                 onChange={e => setUsername(e.target.value)}
-                placeholder="Choose your username"
+                placeholder={t('chooseUsername')}
                 disabled={isLoading}
-                className={error && error.includes('Username') ? 'input-error' : ''}
+                className={error && error.includes(t('username')) ? 'input-error' : ''}
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="password">Password *</label>
+              <label htmlFor="password">{t('password')} *</label>
               <input
                 type="password"
                 id="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                placeholder="Create a strong password (min 6 chars)"
+                placeholder={t('createStrongPassword')}
                 disabled={isLoading}
-                className={error && error.includes('Password') ? 'input-error' : ''}
+                className={error && error.includes(t('password')) ? 'input-error' : ''}
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="confirmPassword">Confirm Password *</label>
+              <label htmlFor="confirmPassword">{t('confirmPassword')} *</label>
               <input
                 type="password"
                 id="confirmPassword"
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
-                placeholder="Confirm your password"
+                placeholder={t('confirmYourPassword')}
                 disabled={isLoading}
-                className={error && error.includes('match') ? 'input-error' : ''}
+                className={error && error.includes(t('password')) ? 'input-error' : ''}
               />
             </div>
 
@@ -251,17 +255,17 @@ export default function SignUp({ onSignUpSuccess, onBackToLogin }: SignUpProps) 
                 className="btn-back"
                 disabled={isLoading}
               >
-                Back
+                {t('backToLogin')}
               </button>
               <button type="submit" className="signup-btn" disabled={isLoading}>
-                {isLoading ? 'Creating Account...' : 'Create Account'}
+                {isLoading ? t('creatingAccount') : t('createAccount')}
               </button>
             </div>
           </form>
         )}
 
         <div className="signup-footer">
-          <p>Already have an account? <button onClick={onBackToLogin} className="link-btn">Sign in</button></p>
+          <p>{t('dontHaveAccount')} <button onClick={onBackToLogin} className="link-btn">{t('signIn')}</button></p>
         </div>
       </div>
     </div>
