@@ -1,0 +1,214 @@
+.takeoff-card {
+  background: #ffffff;
+  border: 1px solid #e6eaf0;
+  border-radius: 14px;
+  padding: 1.25rem;
+  margin-top: 1.25rem;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+  color: #102a43;
+}
+
+.takeoff-header h2 {
+  margin: 0;
+}
+
+.takeoff-header p {
+  margin: 0.4rem 0 1rem;
+  color: #5f6b7a;
+}
+
+.takeoff-steps {
+  display: flex;
+  gap: 0.7rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.step-pill {
+  border: 1px solid #c8d2df;
+  background: #f7fafc;
+  border-radius: 999px;
+  padding: 0.5rem 0.95rem;
+  cursor: pointer;
+  min-height: 38px;
+}
+
+.step-pill.active {
+  background: #102a43;
+  color: #fff;
+  border-color: #102a43;
+}
+
+.field-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.takeoff-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: #102a43;
+  font-weight: 600;
+}
+
+.scope-row {
+  display: flex;
+  gap: 1.2rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 1.2rem;
+}
+
+.rooms-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.9rem;
+}
+
+.room-card {
+  border: 1px solid #dfe5ee;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 0.9rem;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+}
+
+.room-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.2rem;
+  align-items: center;
+  margin-bottom: 0.9rem;
+}
+
+.room-header input[type='text'] {
+  flex: 1;
+}
+
+.room-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.room-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.9rem;
+}
+
+.openings-section {
+  margin-top: 0.9rem;
+  padding: 0.8rem;
+  border: 1px dashed #d8e1ec;
+  border-radius: 8px;
+  background: #fcfdff;
+}
+
+.openings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.opening-row {
+  display: grid;
+  grid-template-columns: 1fr 120px 120px 40px;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
+}
+
+.room-errors {
+  margin: 0.6rem 0 0;
+  color: #b42318;
+  padding-left: 1.2rem;
+}
+
+.takeoff-summary,
+.saved-takeoffs {
+  border-top: 1px dashed #d9e2ec;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.1rem;
+  margin: 0.45rem 0;
+  align-items: center;
+}
+
+.summary-row.total {
+  font-weight: 700;
+}
+
+.step-actions {
+  display: flex;
+  gap: 0.7rem;
+  justify-content: flex-end;
+  margin-top: 1.15rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.takeoff-card button {
+  min-height: 38px;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid #c8d2df;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  color: #102a43;
+  line-height: 1.2;
+}
+
+.takeoff-card button:hover {
+  background: #f6f8fc;
+}
+
+.takeoff-card button.primary-btn {
+  background: #1359c6 !important;
+  color: #ffffff !important;
+  border: 1px solid #1359c6 !important;
+  min-width: 170px;
+}
+
+.takeoff-card button.primary-btn:hover {
+  background: #0f4fb3 !important;
+}
+
+.preview-table {
+  border: 1px solid #dfe5ee;
+  border-radius: 8px;
+  padding: 0.85rem;
+  background: #ffffff;
+}
+
+.preview-totals {
+  margin-top: 0.75rem;
+}
+
+.error-text {
+  color: #b42318;
+}
+
+.takeoff-card input,
+.takeoff-card select {
+  width: 100%;
+  min-height: 38px;
+  border-radius: 8px;
+  border: 1px solid #c8d2df;
+  padding: 0.45rem 0.6rem;
+  background: #fff;
+  color: #102a43;
+}
+
+@media (max-width: 800px) {
+  .opening-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}

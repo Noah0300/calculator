@@ -20,6 +20,16 @@ interface CostSummary {
   grandTotal: number
 }
 
+interface QuotePdfRow {
+  itemName: string
+  quantity: number
+  unitPrice: number
+  baseCost: number
+  laborCost: number
+  overheadCost: number
+  totalCost: number
+}
+
 const currency = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
@@ -101,10 +111,12 @@ export const exportQuoteToPdf = ({
   projectDetails,
   items,
   totals,
+  rows,
 }: {
   projectDetails: ProjectDetails
   items: Item[]
   totals: CostSummary
+  rows?: QuotePdfRow[]
 }) => {
   const pdf = new SimplePdf()
 
@@ -130,20 +142,34 @@ export const exportQuoteToPdf = ({
     pdf.text(x, 708, header, 9)
   })
 
+  const quoteRows: QuotePdfRow[] =
+    rows ??
+    items.map(item => {
+      const costs = calculateItemCosts(item)
+      return {
+        itemName: item.itemName,
+        quantity: Number(item.quantity),
+        unitPrice: Number(item.unitPrice),
+        baseCost: costs.baseCost,
+        laborCost: costs.laborCost,
+        overheadCost: costs.overheadCost,
+        totalCost: costs.totalCost,
+      }
+    })
+
   let y = 686
-  items.forEach(item => {
+  quoteRows.forEach(row => {
     if (y < 130) {
       return
     }
-    const costs = calculateItemCosts(item)
     pdf.line(36, y - 2, 559, y - 2, 0.4)
-    pdf.text(columns[0], y, item.itemName.slice(0, 20), 9)
-    pdf.text(columns[1], y, Number(item.quantity).toFixed(2), 9)
-    pdf.text(columns[2], y, currency.format(Number(item.unitPrice)), 9)
-    pdf.text(columns[3], y, currency.format(costs.baseCost), 9)
-    pdf.text(columns[4], y, currency.format(costs.laborCost), 9)
-    pdf.text(columns[5], y, currency.format(costs.overheadCost), 9)
-    pdf.text(columns[6] - 40, y, currency.format(costs.totalCost), 9)
+    pdf.text(columns[0], y, row.itemName.slice(0, 20), 9)
+    pdf.text(columns[1], y, row.quantity.toFixed(2), 9)
+    pdf.text(columns[2], y, currency.format(row.unitPrice), 9)
+    pdf.text(columns[3], y, currency.format(row.baseCost), 9)
+    pdf.text(columns[4], y, currency.format(row.laborCost), 9)
+    pdf.text(columns[5], y, currency.format(row.overheadCost), 9)
+    pdf.text(columns[6] - 40, y, currency.format(row.totalCost), 9)
     y -= 20
   })
 

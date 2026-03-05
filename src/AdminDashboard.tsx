@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createLicenseKey, getLicenses, saveLicenses } from './licenseUtils'
 import { useLanguage } from './LanguageContext'
 import { useTranslation } from './i18n'
@@ -18,11 +18,30 @@ interface User {
 
 const USERS_STORAGE_KEY = 'itemList_users'
 
+const loadUsersFromStorage = (): User[] => {
+  try {
+    const savedUsers = localStorage.getItem(USERS_STORAGE_KEY)
+    return savedUsers ? JSON.parse(savedUsers) : []
+  } catch (err) {
+    console.error('Failed to load users:', err)
+    return []
+  }
+}
+
+const loadLicensesFromStorage = (): LicenseKey[] => {
+  try {
+    return getLicenses()
+  } catch (err) {
+    console.error('Failed to load licenses:', err)
+    return []
+  }
+}
+
 export default function AdminDashboard({ currentUser, onLogout }: AdminDashboardProps) {
   const { language } = useLanguage()
   const { t } = useTranslation(language)
-  const [users, setUsers] = useState<User[]>([])
-  const [licenses, setLicenses] = useState<LicenseKey[]>([])
+  const [users, setUsers] = useState<User[]>(loadUsersFromStorage)
+  const [licenses, setLicenses] = useState<LicenseKey[]>(loadLicensesFromStorage)
   const [newUsername, setNewUsername] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [newRole, setNewRole] = useState('user')
@@ -32,28 +51,6 @@ export default function AdminDashboard({ currentUser, onLogout }: AdminDashboard
   const [showUserForm, setShowUserForm] = useState(false)
   const [showLicenseForm, setShowLicenseForm] = useState(false)
   const [copiedLicenseKey, setCopiedLicenseKey] = useState<string | null>(null)
-
-  // Load users from localStorage
-  useEffect(() => {
-    try {
-      const savedUsers = localStorage.getItem(USERS_STORAGE_KEY)
-      if (savedUsers) {
-        setUsers(JSON.parse(savedUsers))
-      }
-    } catch (err) {
-      console.error('Failed to load users:', err)
-    }
-  }, [])
-
-  // Load licenses from localStorage
-  useEffect(() => {
-    try {
-      const allLicenses = getLicenses()
-      setLicenses(allLicenses)
-    } catch (err) {
-      console.error('Failed to load licenses:', err)
-    }
-  }, [])
 
   const validateNewUser = (): boolean => {
     setError('')

@@ -1,0 +1,123 @@
+import { DEFAULT_ROUNDING_RULES } from './projectSettings'
+import type { PricingModule } from './types'
+
+export const DEMO_MODULES: PricingModule[] = [
+  {
+    id: 'stucwerk-m2',
+    name: 'Stucwerk',
+    unitType: 'M2',
+    baseRateExVat: 28,
+    defaults: {
+      wasteFactor: 1.05,
+      complexityFactor: 1,
+      setupCost: 35,
+      minimumCharge: 180,
+      roundingRules: DEFAULT_ROUNDING_RULES,
+      distribution: {
+        materialPercent: 35,
+        laborPercent: 55,
+        equipmentPercent: 5,
+        subcontractorPercent: 0,
+      },
+      laborSurchargePercent: 0,
+      overheadPercent: 8,
+      markupPercent: 5,
+      profitPercent: 4,
+    },
+  },
+  {
+    id: 'vloer-leggen-m2',
+    name: 'Vloer leggen',
+    unitType: 'M2',
+    baseRateExVat: 42,
+    defaults: {
+      wasteFactor: 1.08,
+      complexityFactor: 1,
+      setupCost: 60,
+      minimumCharge: 260,
+      roundingRules: DEFAULT_ROUNDING_RULES,
+      distribution: {
+        materialPercent: 45,
+        laborPercent: 40,
+        equipmentPercent: 10,
+        subcontractorPercent: 0,
+      },
+      laborSurchargePercent: 0,
+      overheadPercent: 7,
+      markupPercent: 6,
+      profitPercent: 4,
+    },
+  },
+  {
+    id: 'isolatie-m2',
+    name: 'Isolatie',
+    unitType: 'M2',
+    baseRateExVat: 31,
+    defaults: {
+      wasteFactor: 1.03,
+      complexityFactor: 1,
+      setupCost: 25,
+      minimumCharge: 180,
+      roundingRules: DEFAULT_ROUNDING_RULES,
+      distribution: {
+        materialPercent: 55,
+        laborPercent: 30,
+        equipmentPercent: 5,
+        subcontractorPercent: 0,
+      },
+      laborSurchargePercent: 0,
+      overheadPercent: 8,
+      markupPercent: 5,
+      profitPercent: 3,
+    },
+  },
+  {
+    id: 'betonvloer-m2',
+    name: 'Betonvloer',
+    unitType: 'M2',
+    baseRateExVat: 74,
+    defaults: {
+      wasteFactor: 1.06,
+      complexityFactor: 1,
+      setupCost: 120,
+      minimumCharge: 550,
+      roundingRules: DEFAULT_ROUNDING_RULES,
+      distribution: {
+        materialPercent: 50,
+        laborPercent: 20,
+        equipmentPercent: 20,
+        subcontractorPercent: 0,
+      },
+      laborSurchargePercent: 0,
+      overheadPercent: 9,
+      markupPercent: 6,
+      profitPercent: 5,
+    },
+  },
+  {
+    id: 'sloop-m2',
+    name: 'Sloop',
+    unitType: 'M3',
+    baseRateExVat: 35,
+    defaults: {
+      wasteFactor: 1,
+      complexityFactor: 1.05,
+      setupCost: 80,
+      minimumCharge: 320,
+      roundingRules: DEFAULT_ROUNDING_RULES,
+      distribution: {
+        materialPercent: 10,
+        laborPercent: 45,
+        equipmentPercent: 30,
+        subcontractorPercent: 0,
+      },
+      laborSurchargePercent: 0,
+      overheadPercent: 10,
+      markupPercent: 6,
+      profitPercent: 4,
+    },
+  },
+]
+
+export const getModuleById = (moduleId: string): PricingModule | undefined =>
+  DEMO_MODULES.find(module => module.id === moduleId)

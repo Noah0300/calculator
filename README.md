@@ -10,6 +10,8 @@ This project is no longer a default Vite starter. It is a complete local-first q
 - License-key based sign-up flow
 - Admin dashboard for user and license management
 - Item cost calculations (base, labor, overhead, total)
+- Modular pricing engine (`QuoteLine`) with VAT + rounding strategy
+- Takeoff wizard for on-site measurements and module-based quote lines
 - Quotation detail form (project, customer, prepared by, quote number)
 - PDF export of quotations
 - English and Dutch UI support
@@ -97,6 +99,31 @@ On first app load, a default admin license is initialized when no licenses exist
    - Grand total
 5. Export the quotation as PDF
 
+## Takeoff Wizard (Nieuwe Module Berekening)
+
+The app includes a guided takeoff flow to measure rooms and convert directly into quote lines.
+
+### Supported modules
+
+- Stucwerk: `Wanden` or `Plafond` (separate)
+- Vloer leggen: floor area with optional cut loss
+- Isolatie: `Wanden`, `Plafond`, or `Vloer` (separate)
+- Betonvloer: floor area (no cut loss)
+- Sloop: volume per room (`m3`) using `L x B x H` (no cut loss, no waste factor)
+
+### Measurement rules
+
+- Walls (stuc/isolatie): `breedte x hoogte`
+- Ceiling/Floor: `lengte x breedte`
+- Openings (doors/windows) are subtracted from wall area
+- Rooms can be renamed, duplicated, and deleted
+- Wizard supports realtime validation and preview before adding to quote
+
+### Quote output mode
+
+- Merge all measured rooms into 1 quote line
+- Or create 1 quote line per room
+
 ## Admin Dashboard
 
 Admins can:
@@ -128,6 +155,7 @@ The app uses `localStorage` keys:
 - `itemList_users` for user accounts
 - `itemList_licenses` for license records
 - `itemList_items_<username>` for user-specific item lists
+- `itemList_takeoffs_<username>` for saved takeoff drafts
 - `appLanguage` for selected UI language
 
 ## Project Structure
@@ -145,9 +173,11 @@ src/
   AdminDashboard.tsx     # User and license management UI
 
   ItemForm.tsx           # Item input + validation
+  ModuleTakeoffWizard.tsx# 4-step measurement wizard
   ItemList.tsx           # Item table + totals + PDF export action
   quotePdf.ts            # Minimal in-browser PDF generator
   licenseUtils.ts        # License key generation/validation/usage helpers
+  domain/                # Pricing engine, modules, adapters, takeoff formulas
 
   *.css                  # Component-specific styling
 ```
@@ -167,3 +197,5 @@ Defined in `package.json`:
 - `npm run build` - type-check and build for production
 - `npm run preview` - preview production build locally
 - `npm run lint` - run ESLint
+- `npm run test` - run unit tests (Vitest)
+- `npm run test:e2e` - run smoke E2E tests (Playwright)

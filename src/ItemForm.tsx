@@ -19,7 +19,7 @@ interface FormErrors {
   overheadPercent?: string
 }
 
-interface Item extends FormData {}
+type Item = FormData
 
 interface ItemFormProps {
   onAddItem: (item: Item) => void

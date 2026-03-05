@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { validateLicenseKey, useLicenseKey } from './licenseUtils'
+import { validateLicenseKey, useLicenseKey as markLicenseKeyUsed } from './licenseUtils'
+import type { LicenseKey } from './licenseUtils'
 import { useLanguage } from './LanguageContext'
 import { useTranslation } from './i18n'
 import './SignUp.css'
@@ -28,7 +29,7 @@ export default function SignUp({ onSignUpSuccess, onBackToLogin }: SignUpProps) 
   const [success, setSuccess] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [step, setStep] = useState<'license' | 'details'>('license')
-  const [validatedLicense, setValidatedLicense] = useState<any>(null)
+  const [validatedLicense, setValidatedLicense] = useState<LicenseKey | null>(null)
 
   const handleValidateLicense = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -80,6 +81,12 @@ export default function SignUp({ onSignUpSuccess, onBackToLogin }: SignUpProps) 
 
     setTimeout(() => {
       try {
+        if (!validatedLicense) {
+          setError(t('invalidLicense'))
+          setIsLoading(false)
+          return
+        }
+
         // Validate inputs
         if (!username.trim()) {
           setError(t('usernameRequired'))
@@ -137,7 +144,7 @@ export default function SignUp({ onSignUpSuccess, onBackToLogin }: SignUpProps) 
         localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(allUsers))
 
         // Mark license as used
-        useLicenseKey(validatedLicense.key, username.trim())
+        markLicenseKeyUsed(validatedLicense.key, username.trim())
 
         // Reset form and proceed
         setLicenseKey('')

@@ -4,13 +4,19 @@ import SignUp from './SignUp'
 import AdminDashboard from './AdminDashboard'
 import ItemForm from './ItemForm'
 import ItemList from './ItemList'
+import ModuleTakeoffWizard from './ModuleTakeoffWizard'
 import ConfirmDialog from './ConfirmDialog'
 import { initializeDefaultAdminLicense } from './licenseUtils'
 import { useLanguage } from './LanguageContext'
 import { useTranslation } from './i18n'
+import {
+  DEFAULT_PROJECT_SETTINGS,
+  legacyItemToQuoteLine,
+} from './domain'
+import type { ProjectSettings, QuoteLineInput } from './domain'
 import './App.css'
 
-interface Item {
+interface LegacyItem {
   itemName: string
   quantity: string
   unitPrice: string
@@ -33,6 +39,29 @@ interface ProjectDetails {
   quoteNumber: string
 }
 
+const isQuoteLineArray = (value: unknown): value is QuoteLineInput[] =>
+  Array.isArray(value) &&
+  value.every(
+    item =>
+      typeof item === 'object' &&
+      item !== null &&
+      'description' in item &&
+      'quantity' in item &&
+      'baseRateExVat' in item
+  )
+
+const isLegacyItemArray = (value: unknown): value is LegacyItem[] =>
+  Array.isArray(value) &&
+  value.every(
+    item =>
+      typeof item === 'object' &&
+      item !== null &&
+      'itemName' in item &&
+      'unitPrice' in item &&
+      'laborPercent' in item &&
+      'overheadPercent' in item
+  )
+
 // Helper function to get user-specific storage key
 const getUserStorageKey = (username: string): string => {
   return `itemList_items_${username}`
@@ -42,11 +71,13 @@ function App() {
   const { language } = useLanguage()
   const { t } = useTranslation(language)
   const [auth, setAuth] = useState<AuthState>({ isLoggedIn: false, username: '', role: '' })
-  const [items, setItems] = useState<Item[]>([])
+  const [quoteLines, setQuoteLines] = useState<QuoteLineInput[]>([])
   const [isLoadingAuth, setIsLoadingAuth] = useState(true)
   const [isLoadingItems, setIsLoadingItems] = useState(true)
   const [showClearConfirm, setShowClearConfirm] = useState(false)
   const [showSignUp, setShowSignUp] = useState(false)
+  const [entryMode, setEntryMode] = useState<'legacy' | 'module'>('legacy')
+  const projectSettings: ProjectSettings = DEFAULT_PROJECT_SETTINGS
   const [projectDetails, setProjectDetails] = useState<ProjectDetails>({
     projectName: '',
     customerName: '',
@@ -85,32 +116,41 @@ function App() {
         const userKey = getUserStorageKey(auth.username)
         const savedItems = localStorage.getItem(userKey)
         if (savedItems) {
-          const parsedItems = JSON.parse(savedItems)
-          setItems(parsedItems)
+          const parsedItems: unknown = JSON.parse(savedItems)
+
+          if (isQuoteLineArray(parsedItems)) {
+            setQuoteLines(parsedItems)
+          } else if (isLegacyItemArray(parsedItems)) {
+            setQuoteLines(
+              parsedItems.map(item => legacyItemToQuoteLine(item, projectSettings))
+            )
+          } else {
+            setQuoteLines([])
+          }
         } else {
-          setItems([])
+          setQuoteLines([])
         }
       } else {
-        setItems([])
+        setQuoteLines([])
       }
     } catch (error) {
       console.error('Failed to load items from localStorage:', error)
     } finally {
       setIsLoadingItems(false)
     }
-  }, [auth.username, auth.isLoggedIn, isLoadingAuth])
+  }, [auth.username, auth.isLoggedIn, auth.role, isLoadingAuth, projectSettings])
 
   // Save user-specific items to localStorage whenever they change
   useEffect(() => {
     if (!isLoadingItems && auth.isLoggedIn && auth.username) {
       try {
         const userKey = getUserStorageKey(auth.username)
-        localStorage.setItem(userKey, JSON.stringify(items))
+        localStorage.setItem(userKey, JSON.stringify(quoteLines))
       } catch (error) {
         console.error('Failed to save items to localStorage:', error)
       }
     }
-  }, [items, isLoadingItems, auth.username, auth.isLoggedIn])
+  }, [quoteLines, isLoadingItems, auth.username, auth.isLoggedIn])
 
   // Save auth state to localStorage whenever it changes
   useEffect(() => {
@@ -129,13 +169,18 @@ function App() {
 
   const handleLogout = () => {
     // Clear items before logging out
-    setItems([])
+    setQuoteLines([])
     setAuth({ isLoggedIn: false, username: '', role: '' })
     localStorage.removeItem(AUTH_STORAGE_KEY)
   }
 
-  const handleAddItem = (newItem: Item) => {
-    setItems(prev => [...prev, newItem])
+  const handleAddItem = (newItem: LegacyItem) => {
+    const quoteLine = legacyItemToQuoteLine(newItem, projectSettings)
+    setQuoteLines(prev => [...prev, quoteLine])
+  }
+
+  const handleAddQuoteLines = (newLines: QuoteLineInput[]) => {
+    setQuoteLines(prev => [...prev, ...newLines])
   }
 
   const handleProjectDetailsChange = (field: keyof ProjectDetails, value: string) => {
@@ -147,7 +192,7 @@ function App() {
   }
 
   const handleConfirmClear = () => {
-    setItems([])
+    setQuoteLines([])
     // Clear user-specific items from localStorage
     if (auth.username) {
       const userKey = getUserStorageKey(auth.username)
@@ -281,9 +326,56 @@ function App() {
           </div>
         </div>
 
-        <ItemForm onAddItem={handleAddItem} />
+        <div
+          style={{
+            display: 'flex',
+            gap: '0.5rem',
+            marginBottom: '1rem',
+            flexWrap: 'wrap',
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setEntryMode('legacy')}
+            style={{
+              padding: '0.5rem 0.85rem',
+              borderRadius: '8px',
+              border: '1px solid #c9d4e0',
+              background: entryMode === 'legacy' ? '#102a43' : '#fff',
+              color: entryMode === 'legacy' ? '#fff' : '#1f2937',
+              cursor: 'pointer',
+            }}
+          >
+            Snelle item invoer
+          </button>
+          <button
+            type="button"
+            data-testid="open-module-wizard"
+            onClick={() => setEntryMode('module')}
+            style={{
+              padding: '0.5rem 0.85rem',
+              borderRadius: '8px',
+              border: '1px solid #c9d4e0',
+              background: entryMode === 'module' ? '#102a43' : '#fff',
+              color: entryMode === 'module' ? '#fff' : '#1f2937',
+              cursor: 'pointer',
+            }}
+          >
+            Nieuwe Module Berekening
+          </button>
+        </div>
+
+        {entryMode === 'legacy' ? (
+          <ItemForm onAddItem={handleAddItem} />
+        ) : (
+          <ModuleTakeoffWizard
+            currentUser={auth.username}
+            projectSettings={projectSettings}
+            onAddQuoteLines={handleAddQuoteLines}
+          />
+        )}
         
-        {items.length > 0 && (
+        {quoteLines.length > 0 && (
           <div className="clear-all-container">
             <button 
               onClick={handleClearAllClick}
@@ -295,7 +387,11 @@ function App() {
           </div>
         )}
         
-        <ItemList items={items} projectDetails={projectDetails} />
+        <ItemList
+          quoteLines={quoteLines}
+          projectDetails={projectDetails}
+          projectSettings={projectSettings}
+        />
       </div>
     </div>
   )

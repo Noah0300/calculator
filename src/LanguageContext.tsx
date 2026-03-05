@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useState } from 'react'
 import type { Language } from './i18n'
 
 interface LanguageContextType {
@@ -9,15 +10,13 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
-  const [language, setLanguageState] = useState<Language>('en')
-
-  // Load language from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem('appLanguage') as Language
+  const [language, setLanguageState] = useState<Language>(() => {
+    const saved = localStorage.getItem('appLanguage')
     if (saved === 'en' || saved === 'nl') {
-      setLanguageState(saved)
+      return saved
     }
-  }, [])
+    return 'en'
+  })
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang)
