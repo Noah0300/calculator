@@ -1,111 +1,169 @@
-# React TypeScript Hello World App
+# Item Cost Calculator
 
-A simple React application with TypeScript, built with Vite for fast development and optimized production builds.
+A React + TypeScript app for managing quotation items, calculating cost breakdowns, and exporting project quotes to PDF.
 
-## Project Setup
+## Overview
 
-This project was scaffolded using Vite with the React TypeScript template. All dependencies are automatically installed.
+This project is no longer a default Vite starter. It is a complete local-first quotation tool with:
+
+- Role-based login (`user` and `admin`)
+- License-key based sign-up flow
+- Admin dashboard for user and license management
+- Item cost calculations (base, labor, overhead, total)
+- Quotation detail form (project, customer, prepared by, quote number)
+- PDF export of quotations
+- English and Dutch UI support
+
+All data is stored in the browser via `localStorage`.
+
+## Tech Stack
+
+- React 19
+- TypeScript 5
+- Vite 7
+- ESLint 9
+
+## Quick Start
 
 ### Prerequisites
 
-- Node.js (v14 or higher)
-- npm or yarn
+- Node.js 18+
+- npm
 
-### Folder Structure
+### Install and run
 
-```
-test/
-├── src/
-│   ├── App.tsx          # Main React component (Hello World)
-│   ├── main.tsx         # Application entry point
-│   ├── index.css        # Global styles
-│   ├── App.css          # Component styles
-│   └── assets/          # Static assets
-├── public/              # Static files served directly
-├── index.html           # HTML entry point
-├── package.json         # Project dependencies and scripts
-├── tsconfig.json        # TypeScript configuration
-├── vite.config.ts       # Vite configuration
-└── eslint.config.js     # ESLint configuration
+```bash
+npm install
+npm run dev
 ```
 
-## Available Scripts
+Open: `http://localhost:5173`
 
-In the project directory, you can run:
-
-### `npm run dev`
-Runs the app in development mode with Hot Module Replacement (HMR).
-Open [http://localhost:5173](http://localhost:5173) to view it in your browser.
-
-### `npm run build`
-Builds the app for production to the `dist/` folder.
-
-### `npm run preview`
-Previews the production build locally.
-
-### `npm run lint`
-Runs ESLint to check code quality.
-
-## Getting Started
-
-1. **Install dependencies** (already done):
-   ```bash
-   npm install
-   ```
-
-2. **Start the development server**:
-   ```bash
-   npm run dev
-   ```
-
-3. The app will open at [http://localhost:5173](http://localhost:5173)
-
-## Hello World Component
-
-The main component is located in [src/App.tsx](src/App.tsx) and displays a simple "Hello, World!" message along with a status message indicating the React TypeScript setup is working correctly.
-
-## Technologies Used
-
-- **React 19** - A JavaScript library for building user interfaces
-- **TypeScript** - Adds static type checking to JavaScript
-- **Vite** - Next generation frontend tooling with instant HMR
-- **ESLint** - JavaScript linter for code quality
-
-## Development
-
-The project uses:
-- **Hot Module Replacement (HMR)**: Changes in your code are instantly reflected in the browser without full page reloads
-- **TypeScript**: Provides type safety and better IDE support
-- **ESLint**: Helps maintain code quality and consistency
-
-## Building for Production
-
-To create an optimized production build:
+### Production build
 
 ```bash
 npm run build
+npm run preview
 ```
 
-The build output will be in the `dist/` folder, ready for deployment.
+### Lint
 
-## Troubleshooting
+```bash
+npm run lint
+```
 
-If you encounter issues:
+## Authentication and Roles
 
-1. **Clear node_modules and reinstall**:
-   ```bash
-   rm -r node_modules package-lock.json
-   npm install
-   ```
+### Default login
 
-2. **Clear Vite cache**:
-   ```bash
-   rm -r .vite
-   npm run dev
-   ```
+The app seeds a default admin user (if no users exist):
 
-## Learn More
+- Username: `admin`
+- Password: `admin123`
+- Role: `admin`
 
-- [React Documentation](https://react.dev)
-- [Vite Documentation](https://vite.dev)
-- [TypeScript Documentation](https://www.typescriptlang.org)
+### Sign-up with license key
+
+New users register in 2 steps:
+
+1. Validate a license key
+2. Create account credentials
+
+A valid license determines the role of the account (`user` or `admin`).
+
+### Default initial license
+
+On first app load, a default admin license is initialized when no licenses exist:
+
+- `ADMIN-DEFAULT-000000`
+
+## Main User Flow
+
+1. Log in as a regular `user`
+2. Fill in quotation metadata:
+   - Project name
+   - Customer name
+   - Prepared by
+   - Quote number
+3. Add items with:
+   - Quantity
+   - Unit price
+   - Labor percentage
+   - Overhead percentage
+4. View automatic totals:
+   - Base cost
+   - Labor cost
+   - Overhead cost
+   - Grand total
+5. Export the quotation as PDF
+
+## Admin Dashboard
+
+Admins can:
+
+- Create users (`user` or `admin`)
+- Delete users (except default `admin`)
+- Generate license keys
+- Revoke active licenses
+- Copy license keys to clipboard
+
+Constraint:
+
+- Only the main `admin` user can generate `admin` licenses.
+
+## Internationalization
+
+Language support is built-in via a custom translation setup:
+
+- `EN` (English)
+- `NL` (Nederlands)
+
+Language is persisted in `localStorage` under `appLanguage`.
+
+## Data Persistence
+
+The app uses `localStorage` keys:
+
+- `itemList_auth` for current session auth state
+- `itemList_users` for user accounts
+- `itemList_licenses` for license records
+- `itemList_items_<username>` for user-specific item lists
+- `appLanguage` for selected UI language
+
+## Project Structure
+
+```text
+src/
+  App.tsx                # App routing logic for login/signup/admin/user flows
+  main.tsx               # Entry point + LanguageProvider
+  i18n.ts                # Translation dictionary and translator hook
+  LanguageContext.tsx    # Language state and persistence
+  LanguageSwitcher.tsx   # EN/NL switch UI
+
+  Login.tsx              # Sign-in screen
+  SignUp.tsx             # License validation + account creation
+  AdminDashboard.tsx     # User and license management UI
+
+  ItemForm.tsx           # Item input + validation
+  ItemList.tsx           # Item table + totals + PDF export action
+  quotePdf.ts            # Minimal in-browser PDF generator
+  licenseUtils.ts        # License key generation/validation/usage helpers
+
+  *.css                  # Component-specific styling
+```
+
+## Notes and Limitations
+
+- This is a local-first frontend app; there is no backend/API.
+- Credentials are stored in `localStorage` (not secure for production use).
+- PDF generation is implemented manually in-browser without third-party PDF libraries.
+- License expiry is supported in utility logic (30 days for generated keys).
+
+## Scripts
+
+Defined in `package.json`:
+
+- `npm run dev` - start Vite dev server
+- `npm run build` - type-check and build for production
+- `npm run preview` - preview production build locally
+- `npm run lint` - run ESLint
